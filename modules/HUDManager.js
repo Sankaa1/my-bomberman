@@ -14,6 +14,12 @@ export class HUDManager {
             this.timerText = scene.add.text(width * 0.6, 5, "", { fontSize: "16px", fill: "#FFF" });
 
             this.hudContainer.add([this.hudBackground, this.livesText, this.scoreText, this.timerText]);
+            
+            // Cache des dernières valeurs affichées pour éviter les mises à jour inutiles
+            this.lastLives = -1;
+            this.lastScore = -1;
+            this.lastTimeRemaining = -1;
+            
             this.updateHUD();
             LogManager.log('HUDManager', "🟢 HUDManager créé");
         } catch (e) {
@@ -28,9 +34,23 @@ export class HUDManager {
                 return;
             }
             const { lives, score, timeRemaining } = this.scene.gameState;
-            this.livesText.setText(`❤️ Vies: ${lives}`);
-            this.scoreText.setText(`💣 Score: ${score}`);
-            this.timerText.setText(`⏳ Temps: ${Math.max(0, Math.floor(timeRemaining))}`);
+            
+            // Mise à jour uniquement si les valeurs changent (optimisation)
+            if (lives !== this.lastLives) {
+                this.livesText.setText(`❤️ Vies: ${lives}`);
+                this.lastLives = lives;
+            }
+            
+            if (score !== this.lastScore) {
+                this.scoreText.setText(`💣 Score: ${score}`);
+                this.lastScore = score;
+            }
+            
+            const displayTime = Math.max(0, Math.floor(timeRemaining));
+            if (displayTime !== this.lastTimeRemaining) {
+                this.timerText.setText(`⏳ Temps: ${displayTime}`);
+                this.lastTimeRemaining = displayTime;
+            }
         } catch (e) {
             LogManager.warn('HUDManager', "Exception levée HUDManager -> updateHUD() :", e);
         }

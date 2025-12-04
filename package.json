@@ -1,0 +1,30 @@
+{
+  "name": "bomberman-phaser",
+  "version": "1.0.0",
+  "description": "Bomberman retro game built with Phaser 3",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "http-server -p 8000",
+    "serve": "npx http-server"
+  },
+  "keywords": [
+    "bomberman",
+    "phaser3",
+    "game",
+    "javascript"
+  ],
+  "author": "Sankaa1",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sankaa1/my-bomberman"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

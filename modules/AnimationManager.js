@@ -1,4 +1,6 @@
 // modules/AnimationManager.js
+import LogManager from "../utils/LogManager.js";
+
 export class AnimationManager {
     constructor(scene, config) {
         this.scene = scene;

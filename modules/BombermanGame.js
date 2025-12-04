@@ -95,7 +95,7 @@ export class BombermanGame extends Phaser.Scene {
     setupCamera() {
         try {
             if (!this.player || !this.player.sprite) {
-                LogManager.err("❌ Erreur: Impossible d'attacher la caméra au joueur !");
+                LogManager.error('BombermanGame', "❌ Erreur: Impossible d'attacher la caméra au joueur !");
                 return;
             }
         

@@ -9,10 +9,6 @@ export class Player {
                 LogManager.error('Player', "❌ ERREUR: config est undefined dans Player !");
                 return;
             }
-            if (!config) {
-                LogManager.error('Player', "❌ ERREUR: config est undefined dans Player !");
-                return;
-            }
             if (!scene.gameState) {
                 LogManager.error('Player', "❌ ERREUR: scene.gameState est undefined dans Player !");
                 return;
