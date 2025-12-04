@@ -1,0 +1,3 @@
+Images et de Bomberman Classic
+
+spritesheet format 16 * 16px
