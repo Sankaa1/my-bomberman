@@ -11,7 +11,7 @@ Bomber/
 ├── modules/
 │   ├── AnimationManager.js # Gestion des animations des sprites
 │   ├── BombermanGame.js    # Scène principale du jeu
-│   ├── BombManger.js       # Logique des bombes et explosions
+│   ├── BombManager.js       # Logique des bombes et explosions
 │   ├── BonusManager.js     # Gestion des bonus (vitesse, puissance, etc.)
 │   ├── HUDManager.js       # Interface utilisateur (vies, score, temps)
 │   ├── MapManager.js       # Génération et gestion de la carte

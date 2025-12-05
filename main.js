@@ -5,7 +5,7 @@ import { BombermanGame } from "./modules/BombermanGame.js";
 import { PauseScene } from "./scenes/PauseScene.js";
 import { GameOverScene } from "./scenes/GameOverScene.js";
 
-LogManager.toggleAllDebug(config.debug); // Initialise avec la valeur de config false-> Pas de log
+//LogManager.toggleAllDebug(config.debug); // Initialise avec la valeur de config false-> Pas de log
 // Zoom sur un script pour débug -> Seuls les logs du fichier
 LogManager.toggleAllDebug(false);
 LogManager.toggleDebug('BombermanGame', true); // Sniper activé

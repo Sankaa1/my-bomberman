@@ -3,7 +3,7 @@ import { gameState } from "../utils/GameState.js";
 import { config } from "../utils/vars.js";
 import { MapManager } from "./MapManager.js";
 import { Player } from "./Player.js";
-import { BombManager } from "./BombManger.js";
+import { BombManager } from "./BombManager.js";
 import { AnimationManager } from "./AnimationManager.js";
 import { BonusManager } from "./BonusManager.js";
 import { ResetManager } from "./ResetManager.js";
@@ -15,9 +15,9 @@ export class BombermanGame extends Phaser.Scene {
         super({ key: "BombermanGame" });
         this.gameState = gameState;
         this.config = config;
-        this.isPaused;
+        this.isPaused = false;
         this.resetManager = null;
-        this.hud;
+        this.hud = null;
     }
 
     // modules/BombermanGame.js
@@ -51,13 +51,21 @@ export class BombermanGame extends Phaser.Scene {
             LogManager.log('BombermanGame', "🟢 Gestion des bombes activée !");
             this.player = new Player(this, 1 * this.config.tileSize, 1 * this.config.tileSize);
             LogManager.log('BombermanGame', "🟢 Joueur initialisé !");
-            this.time.delayedCall(100, () => this.setupCamera());
+            this.time.delayedCall(100, () => {
+                this.setupCamera();
+                LogManager.log('BombermanGame', "📸 Caméra configurée !");
+            });
             this.setupControls();
         
-            setTimeout(() => {
+            /* setTimeout(() => {
                 LogManager.log('BombermanGame', "🔄 Recréation des collisions...");
                 this.setupCollisions();
-            }, 100);
+            }, 100); */
+
+            this.time.delayedCall(100, () => {
+                this.setupCollisions()
+                LogManager.log('BombermanGame', "🔗 Collisions configurées !");
+            });
     
             this.bombs.enablePlayerCollision();
             
@@ -67,7 +75,7 @@ export class BombermanGame extends Phaser.Scene {
             }
     
             this.isPaused = false;
-            this.pauseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+            //this.pauseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
             this.resetManager = new ResetManager(this);
     
             let gameOverScene = this.scene.get("GameOverScene");
@@ -77,13 +85,21 @@ export class BombermanGame extends Phaser.Scene {
                 LogManager.error('BombermanGame', "❌ Impossible de transmettre resetManager à GameOverScene !");
             }
             
-            this.timerEvent = this.time.addEvent({
+            /* this.timerEvent = this.time.addEvent({
                 delay: 120000,
                 callback: () => {
                     LogManager.log('BombermanGame', "⏳ Time's up !");
                     this.player.takeDamage();
                 }
-            });        
+            }); */
+            
+            this.timerEvent = this.time.addEvent({
+                delay: config.timePerLevel * 1000, // 120s -> ms
+                callback: () => {
+                    LogManager.log('BombermanGame', "⏳ Time's up !");
+                    this.player.takeDamage();
+                }
+            });
             
             this.hud = new HUDManager(this);
         } catch (e) {

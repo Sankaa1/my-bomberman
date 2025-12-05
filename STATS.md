@@ -7,7 +7,7 @@
 | main.js | 50 | Configuration Phaser & initialisation scènes |
 | BombermanGame.js | 165 | Scène principale, gestion du jeu |
 | Player.js | 205 | Logique joueur, mouvements |
-| BombManger.js | 310 | Système de bombes & explosions |
+| BombManager.js | 310 | Système de bombes & explosions |
 | MapManager.js | 245 | Génération & gestion de carte |
 | BonusManager.js | 152 | Système de bonus |
 | AnimationManager.js | ~85 | Création animations sprites |

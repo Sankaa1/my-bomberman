@@ -20,12 +20,23 @@ export class Player {
             this.isMoving = false;
     
             LogManager.log('Player', "🔍 Création du joueur avec config:", this.config);
-            
-            this.sprite = scene.physics.add.sprite(x, y, 'sprites', 6 * this.config.tilesPerRow + 8)
+
+            this.sprite = scene.physics.add.sprite(
+                this.config.player.startX * this.config.tileSize,
+                this.config.player.startY * this.config.tileSize, 
+                'sprites', 
+                6 * this.config.tilesPerRow + 8
+            )
                 .setSize(12, 12)
                 .setOffset(2, 2)
                 .setOrigin(0.5)
                 .setCollideWorldBounds(true);
+            
+            /* this.sprite = scene.physics.add.sprite(x, y, 'sprites', 6 * this.config.tilesPerRow + 8)
+                .setSize(12, 12)
+                .setOffset(2, 2)
+                .setOrigin(0.5)
+                .setCollideWorldBounds(true); */
 
             LogManager.log('Player', "📍 Position initiale du joueur - X:", this.sprite.x, "Y:", this.sprite.y);
         } catch (e) {
@@ -96,15 +107,15 @@ export class Player {
         try {
             LogManager.log('Player', "🔄 Respawn du joueur...");
             this.sprite.setAlpha(0);
-            this.sprite.setPosition(
+            /* this.sprite.setPosition(
                 1 * this.config.tileSize, // Hardcodé temporairement, à gérer ailleurs si besoin
                 1 * this.config.tileSize
-            );
+            ); */
 
-            /* this.sprite.setPosition(
+            this.sprite.setPosition(
                 this.config.player.startX * this.config.tileSize,
                 this.config.player.startY * this.config.tileSize
-            ); */
+            );
 
             this.scene.tweens.add({
                 targets: this.sprite,

@@ -1,28 +1,32 @@
 // utils/GameState.js
 import LogManager from "./LogManager.js";
+import { config } from "./vars.js";
 export class GameState {
     constructor(){
         try {
-            this.lives = 3;                 // Vies du joueur (peut augmenter 1 seule fois par niveau si tirage chanceux)
-            this.score = 0;                 // Score
-            this.timeRemaining = 120;       // Temps pour finir le niveau en secondes sinon takeDamage()
-            this.maxBombs = 1;              // Nombre max de bombes qu'on peut poser (augmente par bonus)
-            this.bombSize = 1;              // Taille de la bombe (augmente par bonus)
-            this.playerSpeed = 150;         // Vitesse du joueur (augmente par bonus)
+            this.initDefaults();       
         } catch (e) {
             LogManager.warn('GameState', 'Exception levée GameState -> constructor() : ', e);
             return;
         }
     }
 
+    initDefaults(){ // Initialisation des valeurs par défaut au début d'une partie
+        const playerCfg = config.player || {};
+        const bombCfg = config.bomb || {};
+
+        // Valeurs par défaut
+        this.lives = config.startingLives ?? 3;             // Vies du joueur (peut augmenter 1 seule fois par niveau si tirage chanceux)
+        this.score = 0;                                     // Score
+        this.timeRemaining = config.timePerLevel ?? 120;    // Temps pour finir le niveau en secondes sinon takeDamage()
+        this.maxBombs = bombCfg.defaultMaxBombs ?? 1;       // Nombre max de bombes qu'on peut poser (augmente par bonus)
+        this.bombSize = bombCfg.defaultSize ?? 1;           // Taille de la bombe (augmente par bonus)
+        this.playerSpeed = playerCfg.speed ?? 150;          // Vitesse du joueur (augmente par bonus)
+    }
+
     reset(){ // Sera appelé en cas de game over ou de nouvelle partie
         try {
-            this.lives = 3;
-            this.score = 0;
-            this.timeRemaining = 120;
-            this.maxBombs = 1;
-            this.bombSize = 1;
-            this.playerSpeed = 150;
+            this.initDefaults();
         } catch (e) {
             LogManager.warn('GameState', 'Exception levée GameState -> reset() : ', e);
             return;

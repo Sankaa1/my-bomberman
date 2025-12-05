@@ -1,19 +1,18 @@
 // modules/BombManager.js 🔥
-import { gameState } from "../utils/GameState.js";
-import { config } from "../utils/vars.js";
+// import { gameState } from "../utils/GameState.js";
+// import { config } from "../utils/vars.js";
 import LogManager from "../utils/LogManager.js"; // Implémenté ok
 
 export class BombManager {
     constructor(scene, config, mapManager) {
-        this.scene = scene;
-        this.config = config;
-        this.mapManager = mapManager;
-
         if (!config) {
-            LogManager.error('BombManager', "❌ ERREUR: config est undefined dans BombManager !");
+            LogManager.error("BombManager", "❌ ERREUR: config est undefined dans BombManager !");
             return;
         }
 
+        this.scene = scene;
+        this.config = config;
+        this.mapManager = mapManager;
         this.group = this.scene.physics.add.group();
     }
      /**
@@ -25,19 +24,24 @@ export class BombManager {
     placeBomb(playerX, playerY) {
         try {
             if(this.group.getChildren().length >= this.scene.gameState.maxBombs){
-                LogManager.log('BombManager', "❌ Limite de bombes atteinte !");
+                LogManager.log("BombManager", "❌ Limite de bombes atteinte !");
                 return;
             }
             // Convertir la position du joueur en coordonnées de grille
             const tileX = Math.floor(playerX / this.config.tileSize) * this.config.tileSize + this.config.tileSize / 2;
             const tileY = Math.floor(playerY / this.config.tileSize) * this.config.tileSize + this.config.tileSize / 2;
         
-            LogManager.log('BombManager', "💣 Debug BombManager | tileX: ", tileX, "tileY: ", tileY);
+            LogManager.log("BombManager", "💣 Debug BombManager | tileX: ", tileX, "tileY: ", tileY);
         
             // Vérifier si une bombe est déjà placée ici
-            const existingBomb = this.group.getChildren().find(bomb => bomb.x === tileX && bomb.y === tileY);
+            // const existingBomb = this.group.getChildren().find(bomb => bomb.x === tileX && bomb.y === tileY);
+            const existingBomb = this.group.getChildren().find(bomb =>
+                Math.round(bomb.x) === Math.round(tileX) &&
+                Math.round(bomb.y) === Math.round(tileY)
+            );
+
             if (existingBomb) {
-                LogManager.log('BombManager', "❌ Une bombe est déjà placée ici !");
+                LogManager.log("BombManager", "❌ Une bombe est déjà placée ici !");
                 return;
             }
         
@@ -47,7 +51,7 @@ export class BombManager {
                 .setImmovable(true);
         
             if (!bomb) {
-                LogManager.error('BombManager', "❌ Erreur lors de la création de la bombe !");
+                LogManager.error("BombManager", "❌ Erreur lors de la création de la bombe !");
                 return;
             }
             
@@ -112,24 +116,24 @@ export class BombManager {
                     // ✅ Trouvé une case libre, on déplace le joueur et on stoppe la boucle
                     this.scene.player.sprite.x = newX;
                     this.scene.player.sprite.y = newY;
-                    LogManager.log('BombManager', "🚶‍♂️ Joueur déplacé hors de la bombe à", newX, newY);
+                    LogManager.log("BombManager", "🚶‍♂️ Joueur déplacé hors de la bombe à", newX, newY);
                     break;
                 }
             }
         
-            LogManager.log('BombManager', "✅ Bombe placée à", tileX, tileY);
+            LogManager.log("BombManager", "✅ Bombe placée à", tileX, tileY);
         
             // Lancer l'animation
             if (this.scene.anims.exists("bomb")) {
                 bomb.play("bomb");
             } else {
-                LogManager.error('BombManager', "❌ Animation 'bomb' introuvable !");
+                LogManager.error("BombManager", "❌ Animation 'bomb' introuvable !");
             }
         
             // Déclencher l'explosion après un délai
             this.scene.time.delayedCall(this.config.bomb.duration, () => this.explodeBomb(bomb), [], this);
         } catch (e) {
-            LogManager.warn('BombManager', 'Exception levée BombManager -> placeBomb() : ', e);
+            LogManager.warn("BombManager", 'Exception levée BombManager -> placeBomb() : ', e);
             return;
         }
     }
@@ -143,18 +147,18 @@ export class BombManager {
         try {
             if (!this.scene || !bomb.active) return;
             if (!bomb || !bomb.body) {
-                LogManager.warn('BombManager', "⚠ Bombe déjà supprimée ou invalide, annulation de l'explosion.");
+                LogManager.warn("BombManager", "⚠ Bombe déjà supprimée ou invalide, annulation de l'explosion.");
                 return;
             }
             
             if (explodedBombs.has(bomb)) {
-                LogManager.log('BombManager', "⚠ Bombe déjà traitée, évitement d'une double explosion.");
+                LogManager.log("BombManager", "⚠ Bombe déjà traitée, évitement d'une double explosion.");
                 return;
             }
             
             explodedBombs.add(bomb);
             bomb.isExploding = true;
-            LogManager.log('BombManager', `💥 BOOM ! Explosion en (${bomb.x}, ${bomb.y})`);
+            LogManager.log("BombManager", `💥 BOOM ! Explosion en (${bomb.x}, ${bomb.y})`);
             
             let explosionSize = this.scene.gameState.bombSize; // Fix : utilise gameState
             let comboCount = 0;
@@ -173,12 +177,20 @@ export class BombManager {
                 for (let i = 1; i <= explosionSize; i++) {
                     let newX = bomb.x + dir.dx * i;
                     let newY = bomb.y + dir.dy * i;
+
+                    /* let newTileX = Math.floor(newX / this.config.tileSize);
+                    let newTileY = Math.floor(newY / this.config.tileSize);
+
+                    if (newTileX < 0 || newTileX >= this.mapManager.cols || newTileY < 0 || newTileY >= this.mapManager.rows) {
+                        LogManager.log("BombManager", `🚧 Explosion hors limites à (${newX}, ${newY}), arrêt dans cette direction.`);
+                        break;
+                    } */
                     
                     const isWall = this.scene.map.walls.getChildren().some(wall =>
                         Math.round(wall.x) === Math.round(newX) && Math.round(wall.y) === Math.round(newY)
                     );
                     if (isWall) {
-                        LogManager.log('BombManager', `🧱 Mur bloquant à (${newX}, ${newY})`);
+                        LogManager.log("BombManager", `🧱 Mur bloquant à (${newX}, ${newY})`);
                         break;
                     }
                     
@@ -186,7 +198,7 @@ export class BombManager {
                         Math.round(b.x) === Math.round(newX) && Math.round(b.y) === Math.round(newY) && !b.isExploding
                     );
                     if (chainedBomb) {
-                        LogManager.log('BombManager', `💣 Bombe chaînée détectée à (${newX}, ${newY})`);
+                        LogManager.log("BombManager", `💣 Bombe chaînée détectée à (${newX}, ${newY})`);
                         bombsToExplode.push(chainedBomb);
                         continue;
                     }
@@ -195,7 +207,7 @@ export class BombManager {
                         Math.round(obs.x) === Math.round(newX) && Math.round(obs.y) === Math.round(newY)
                     );
                     if (obstacle) {
-                        LogManager.log('BombManager', `🧱 Obstacle détruit à (${newX}, ${newY})`);
+                        LogManager.log("BombManager", `🧱 Obstacle détruit à (${newX}, ${newY})`);
                         obstacle.destroy();
                         this.mapManager.checkPortalSpawn();
                         this.scene.bonusManager.maybeSpawnBonus(newX, newY);
@@ -204,7 +216,7 @@ export class BombManager {
                     }
                     
                     let explosionKey = (i === explosionSize) ? dir.endKey : dir.midKey;
-                    LogManager.log('BombManager', `🔥 Spawn explosion à (${newX}, ${newY}) avec ${explosionKey}`);
+                    LogManager.log("BombManager", `🔥 Spawn explosion à (${newX}, ${newY}) avec ${explosionKey}`);
                     this.spawnExplosion(newX, newY, explosionKey);
                     this.checkPlayerHit(newX, newY);
                 }
@@ -214,14 +226,14 @@ export class BombManager {
             bombsToExplode.forEach(b => this.explodeBomb(b, explodedBombs));
             
             if (bomb && bomb.body) {
-                LogManager.log('BombManager', `🗑 Suppression de la bombe en (${bomb.x}, ${bomb.y})`);
+                LogManager.log("BombManager", `🗑 Suppression de la bombe en (${bomb.x}, ${bomb.y})`);
                 bomb.disableBody(true, true);
                 this.group.remove(bomb, true, true);
             } else {
-                LogManager.warn('BombManager', "⚠ Tentative de suppression d'une bombe déjà supprimée.");
+                LogManager.warn("BombManager", "⚠ Tentative de suppression d'une bombe déjà supprimée.");
             }
         } catch (e) {
-            LogManager.warn('BombManager', 'Exception levée BombManager -> explodeBomb() : ', e);
+            LogManager.warn("BombManager", 'Exception levée BombManager -> explodeBomb() : ', e);
         }
     }
 
@@ -229,12 +241,12 @@ export class BombManager {
         try {
             if (combo > 0) { // ✅ Ne pas donner de points si aucun obstacle n'a été détruit
                 let points = 100 * combo;
-                LogManager.log('BombManager', 'points après * combo: ', points);
+                LogManager.log("BombManager", 'points après * combo: ', points);
                 this.scene.gameState.score += points;
-                LogManager.log('BombManager', `🎯 Score +${points} (combo x${combo})`);
+                LogManager.log("BombManager", `🎯 Score +${points} (combo x${combo})`);
             }
         } catch (e) {
-            LogManager.warn('BombManager', 'Exception levée BombManager -> increaseScore() : ', e);
+            LogManager.warn("BombManager", 'Exception levée BombManager -> increaseScore() : ', e);
             return;
         }
     }    
@@ -250,11 +262,11 @@ export class BombManager {
                 (Math.abs(player.sprite.y - y) < tileSize / 2 && player.sprite.x === x) || // Même colonne, Y proche
                 (Math.round(player.sprite.x) === Math.round(x) && Math.round(player.sprite.y) === Math.round(y)) // Exactement sur la bombe
             ) {
-                LogManager.log('BombManager', "🔥 Le joueur est touché par l'explosion !");
+                LogManager.log("BombManager", "🔥 Le joueur est touché par l'explosion !");
                 player.takeDamage();
             }
         } catch (e) {
-            LogManager.warn('BombManager', 'Exception levée BombManager -> checkPlayerHit() : ', e);
+            LogManager.warn("BombManager", 'Exception levée BombManager -> checkPlayerHit() : ', e);
             return;
         }
     }    
@@ -265,17 +277,17 @@ export class BombManager {
     enablePlayerCollision() {
         try {
             if (!this.scene.player || !this.scene.player.sprite) {
-                LogManager.error('BombManager', "❌ Impossible d'activer la collision avec la bombe : le joueur n'est pas encore initialisé !");
+                LogManager.error("BombManager", "❌ Impossible d'activer la collision avec la bombe : le joueur n'est pas encore initialisé !");
                 return;
             }
         
-            LogManager.log('BombManager', "🚧 Activation de la collision entre le joueur et les bombes");
+            LogManager.log("BombManager", "🚧 Activation de la collision entre le joueur et les bombes");
             
             this.scene.physics.add.collider(this.group, this.scene.player.sprite, (player, bomb) => {
-                LogManager.log('BombManager', "🚧 Le joueur est bloqué par une bombe !");
+                LogManager.log("BombManager", "🚧 Le joueur est bloqué par une bombe !");
             });
         } catch (e) {
-            LogManager.warn('BombManager', 'Exception levée BombManager -> enablePlayerCollision() : ', e);
+            LogManager.warn("BombManager", 'Exception levée BombManager -> enablePlayerCollision() : ', e);
             return;
         }
     }
@@ -300,10 +312,10 @@ export class BombManager {
         
                 this.scene.time.delayedCall(500, () => explosion.destroy(), [], this);
             } else {
-                LogManager.error('BombManager', "❌ Animation manquante :", animationKey);
+                LogManager.error("BombManager", "❌ Animation manquante :", animationKey);
             }
         } catch (e) {
-            LogManager.warn('BombManager', 'Exception levée BombManager -> spawnExplosion() : ', e);
+            LogManager.warn("BombManager", 'Exception levée BombManager -> spawnExplosion() : ', e);
             return;
         }
     }

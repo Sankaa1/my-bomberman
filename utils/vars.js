@@ -18,6 +18,7 @@ export const config = {
     
     // ========== JOUEUR ==========
     player: {
+        startingLives: 3,
         startX: 1,
         startY: 1,
         speed: 150,
