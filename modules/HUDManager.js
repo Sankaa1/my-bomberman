@@ -6,22 +6,73 @@ export class HUDManager {
         try {
             this.scene = scene;
             const width = scene.scale.width;
-            this.hudBackground = scene.add.rectangle(0, 0, width, 30, 0x000000, 0.8).setOrigin(0, 0).setScrollFactor(0);
-            this.hudContainer = scene.add.container(0, 0).setScrollFactor(0);
+            const hudHeight = 50;
+            
+            // Fond simple rectangle - centré
+            this.hudBackground = scene.add.rectangle(width / 2, hudHeight / 2, width, hudHeight, 0x0a0a0a, 0.95)
+                .setOrigin(0.5, 0.5)
+                .setScrollFactor(0)
+                .setDepth(100);
 
-            this.livesText = scene.add.text(10, 5, "", { fontSize: "16px", fill: "#FFF" });
-            this.scoreText = scene.add.text(width * 0.3, 5, "", { fontSize: "16px", fill: "#FFF" });
-            this.timerText = scene.add.text(width * 0.6, 5, "", { fontSize: "16px", fill: "#FFF" });
+            // Section VIES (Gauche) - 25% de la largeur
+            const leftX = width * 0.17;
+            
+            this.livesLabel = scene.add.text(leftX, 8, "LIVES", { 
+                fontSize: "10px", 
+                fill: "#aaaaaa",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            
+            this.livesText = scene.add.text(leftX, 22, "", { 
+                fontSize: "20px", 
+                fill: "#FF6B6B",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
 
-            this.hudContainer.add([this.hudBackground, this.livesText, this.scoreText, this.timerText]);
+            // Section SCORE (Centre) - 50% de la largeur
+            const centerX = width * 0.5;
+            
+            this.scoreLabel = scene.add.text(centerX, 8, "SCORE", { 
+                fontSize: "10px", 
+                fill: "#aaaaaa",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            
+            this.scoreText = scene.add.text(centerX, 22, "", { 
+                fontSize: "20px", 
+                fill: "#4ECDC4",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+
+            // Section TEMPS (Droite) - 75% de la largeur
+            const rightX = width * 0.83;
+            
+            this.timerLabel = scene.add.text(rightX, 8, "TIME", { 
+                fontSize: "10px", 
+                fill: "#aaaaaa",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            
+            this.timerText = scene.add.text(rightX, 22, "", { 
+                fontSize: "20px", 
+                fill: "#FFE66D",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
             
             // Cache des dernières valeurs affichées pour éviter les mises à jour inutiles
             this.lastLives = -1;
             this.lastScore = -1;
             this.lastTimeRemaining = -1;
+            this.hudHeight = hudHeight;
             
             this.updateHUD();
-            LogManager.log('HUDManager', "🟢 HUDManager créé");
+            LogManager.log('HUDManager', "🟢 HUDManager créé avec nouveau design");
         } catch (e) {
             LogManager.warn('HUDManager', "Exception levée HUDManager -> constructor() :", e);
         }
@@ -37,19 +88,39 @@ export class HUDManager {
             
             // Mise à jour uniquement si les valeurs changent (optimisation)
             if (lives !== this.lastLives) {
-                this.livesText.setText(`❤️ Vies: ${lives}`);
+                this.livesText.setText(`${lives} ❤️`);
                 this.lastLives = lives;
+                
+                // Feedback visuel si santé basse
+                if (lives === 1) {
+                    this.livesText.setFill("#FF1744");
+                } else if (lives === 2) {
+                    this.livesText.setFill("#FF6B6B");
+                } else {
+                    this.livesText.setFill("#FF6B6B");
+                }
             }
             
             if (score !== this.lastScore) {
-                this.scoreText.setText(`💣 Score: ${score}`);
+                this.scoreText.setText(score.toString().padStart(5, "0"));
                 this.lastScore = score;
             }
             
             const displayTime = Math.max(0, Math.floor(timeRemaining));
             if (displayTime !== this.lastTimeRemaining) {
-                this.timerText.setText(`⏳ Temps: ${displayTime}`);
+                const minutes = Math.floor(displayTime / 60);
+                const seconds = displayTime % 60;
+                this.timerText.setText(`${minutes}:${seconds.toString().padStart(2, "0")}`);
                 this.lastTimeRemaining = displayTime;
+                
+                // Feedback visuel si temps faible
+                if (displayTime <= 10) {
+                    this.timerText.setFill("#FF1744");
+                } else if (displayTime <= 30) {
+                    this.timerText.setFill("#FFA500");
+                } else {
+                    this.timerText.setFill("#FFE66D");
+                }
             }
         } catch (e) {
             LogManager.warn('HUDManager', "Exception levée HUDManager -> updateHUD() :", e);

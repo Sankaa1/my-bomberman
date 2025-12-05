@@ -99,7 +99,7 @@ export class BombermanGame extends Phaser.Scene {
                 return;
             }
         
-            const hudHeight = 40; // Hauteur du HUD
+            const hudHeight = 50;  // ← Correspond au HUD (hauteur augmentée)
             const gameHeight = this.map.rows * this.config.tileSize;
         
             this.cameras.main
