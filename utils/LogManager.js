@@ -15,6 +15,7 @@ const LogManager = {
 
     log(scriptName, ...args) {
         if (this.debugModes[scriptName]) {
+            // eslint-disable-next-line no-console
             console.log(...args);
         }
     },
@@ -31,7 +32,7 @@ const LogManager = {
     },
 
     toggleDebug(scriptName, active) {
-        if (this.debugModes.hasOwnProperty(scriptName)){
+        if (Object.prototype.hasOwnProperty.call(this.debugModes, scriptName)){
             this.debugModes[scriptName] = active;
             this.log('LogManager' , `🔧 Debug mode pour ${scriptName} switched to: ${active}`);
         } else {

@@ -1,7 +1,7 @@
 // modules/BonusManager.js
-import { GameState } from "../utils/GameState.js";
 import { config } from "../utils/vars.js";
 import LogManager from "../utils/LogManager.js"; // Implémenté ok
+import { ResetManager } from "./ResetManager.js";
 
 export class BonusManager {
     constructor(scene){
@@ -16,8 +16,8 @@ export class BonusManager {
         try {
             LogManager.log('BonusManager', "📢 Initialisation de la scène...");
     
-            // ✅ Initialisation du ResetGame après l'initialisation des modules
-            this.resetManager = new ResetGame(this);
+            // ✅ Initialisation du ResetManager après l'initialisation des modules
+            this.resetManager = new ResetManager(this);
         
             // ✅ Vérifier que bonusManager est bien créé avant de transmettre resetManager
             if (!this.bonusManager) {

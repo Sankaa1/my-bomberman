@@ -283,7 +283,8 @@ export class BombManager {
         
             LogManager.log("BombManager", "🚧 Activation de la collision entre le joueur et les bombes");
             
-            this.scene.physics.add.collider(this.group, this.scene.player.sprite, (player, bomb) => {
+            // eslint-disable-next-line no-unused-vars
+            this.scene.physics.add.collider(this.group, this.scene.player.sprite, (_player, _bomb) => {
                 LogManager.log("BombManager", "🚧 Le joueur est bloqué par une bombe !");
             });
         } catch (e) {

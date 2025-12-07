@@ -1,6 +1,7 @@
 // modules/ResetManager.js
 import { config } from "../utils/vars.js";
 import LogManager from "../utils/LogManager.js"; // Implémenté ok
+import { BonusManager } from "./BonusManager.js";
 
 export class ResetManager {
     constructor(scene){

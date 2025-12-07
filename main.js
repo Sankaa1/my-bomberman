@@ -1,6 +1,8 @@
 // main.js
 import LogManager from "./utils/LogManager.js";
 import Phaser from "phaser";
+// Expose Phaser globally for modules that reference the global `Phaser` variable
+if (typeof window !== 'undefined') window.Phaser = Phaser;
 import { config } from "./utils/vars.js";
 import { BombermanGame } from "./modules/BombermanGame.js";
 import { PauseScene } from "./scenes/PauseScene.js";
@@ -39,4 +41,5 @@ const phaserConfig = {
     ]
 };
 
+// eslint-disable-next-line no-unused-vars
 const game = new Phaser.Game(phaserConfig);

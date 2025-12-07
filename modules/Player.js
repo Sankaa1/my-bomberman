@@ -3,7 +3,7 @@ import { config } from "../utils/vars.js";
 import LogManager from "../utils/LogManager.js"; // Implémenté ok
 
 export class Player {
-    constructor(scene, x, y) {
+    constructor(scene) {
         try {
             if (!config) {
                 LogManager.error('Player', "❌ ERREUR: config est undefined dans Player !");
