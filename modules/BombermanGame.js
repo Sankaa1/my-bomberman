@@ -8,6 +8,7 @@ import { AnimationManager } from "./AnimationManager.js";
 import { BonusManager } from "./BonusManager.js";
 import { ResetManager } from "./ResetManager.js";
 import { HUDManager } from "./HUDManager.js";
+import { LevelManager } from "./LevelManager.js";
 import LogManager from "../utils/LogManager.js"; // implémenté ok
 
 export class BombermanGame extends Phaser.Scene {
@@ -18,6 +19,7 @@ export class BombermanGame extends Phaser.Scene {
         this.isPaused = false;
         this.resetManager = null;
         this.hud = null;
+        this.levelManager = null;
     }
 
     // modules/BombermanGame.js
@@ -41,6 +43,15 @@ export class BombermanGame extends Phaser.Scene {
     create() {
         try {
             LogManager.log('BombermanGame', "📢 Initialisation de la scène...");
+            
+            // Initialise le LevelManager si ce n'est pas déjà fait
+            if (!this.levelManager) {
+                this.levelManager = new LevelManager(this);
+            }
+            
+            const levelConfig = this.levelManager.getCurrentLevelConfig();
+            LogManager.log('BombermanGame', `🎮 Chargement du niveau ${this.levelManager.currentLevel} - Temps: ${levelConfig.timePerLevel}s`);
+            
             this.gameState.reset(); // Remplace config.player.lives
             LogManager.log('BombermanGame', `❤️ Vies réinitialisées: ${this.gameState.lives}`);
         
@@ -85,9 +96,9 @@ export class BombermanGame extends Phaser.Scene {
                 LogManager.error('BombermanGame', "❌ Impossible de transmettre resetManager à GameOverScene !");
             }
             
-            // Initialise le chronomètre du niveau
+            // Initialise le chronomètre du niveau avec la durée appropriée du niveau actuel
             this.levelStartTime = this.time.now; // Temps en ms depuis le démarrage de Phaser
-            this.levelDuration = config.timePerLevel * 1000; // Convertir en ms
+            this.levelDuration = levelConfig.timePerLevel * 1000; // Convertir en ms
             this.timeExpiredFlag = false; // Flag pour éviter d'appeler takeDamage() plusieurs fois
             
             this.hud = new HUDManager(this);

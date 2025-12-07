@@ -64,11 +64,29 @@ export class HUDManager {
                 fontFamily: "Arial",
                 fontStyle: "bold"
             }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+
+            // Section NIVEAU (entre score et temps)
+            const levelX = width * 0.67;
+            
+            this.levelLabel = scene.add.text(levelX, 8, "LEVEL", { 
+                fontSize: "10px", 
+                fill: "#aaaaaa",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            
+            this.levelText = scene.add.text(levelX, 22, "", { 
+                fontSize: "20px", 
+                fill: "#A4D65E",
+                fontFamily: "Arial",
+                fontStyle: "bold"
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
             
             // Cache des dernières valeurs affichées pour éviter les mises à jour inutiles
             this.lastLives = -1;
             this.lastScore = -1;
             this.lastTimeRemaining = -1;
+            this.lastLevel = -1;
             this.hudHeight = hudHeight;
             
             this.updateHUD();
@@ -104,6 +122,15 @@ export class HUDManager {
             if (score !== this.lastScore) {
                 this.scoreText.setText(score.toString().padStart(5, "0"));
                 this.lastScore = score;
+            }
+
+            // Mise à jour du numéro de niveau
+            if (this.scene.levelManager) {
+                const currentLevel = this.scene.levelManager.currentLevel;
+                if (currentLevel !== this.lastLevel) {
+                    this.levelText.setText(currentLevel.toString());
+                    this.lastLevel = currentLevel;
+                }
             }
             
             const displayTime = Math.max(0, Math.floor(timeRemaining));

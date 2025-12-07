@@ -87,7 +87,13 @@ export class MapManager {
     generateInternalBlocks(){
         // Génération des blocs internes
         try {
-            const spawnRate = 0.7; // Paramétrable dans config au besoin
+            // Récupère le spawn rate du niveau actuel
+            let spawnRate = 0.7; // Valeur par défaut
+            if (this.scene.levelManager) {
+                const levelConfig = this.scene.levelManager.getCurrentLevelConfig();
+                spawnRate = levelConfig.mapSpawnRate;
+            }
+            
             for(let x = 2; x < this.cols - 2; x++) {
                 for(let y = 2; y < this.rows - 2; y++) {
                     if(x % 2 === 0 && y % 2 === 0) {
@@ -235,8 +241,20 @@ export class MapManager {
         
             this.scene.physics.add.overlap(this.scene.player.sprite, this.portal, () => {
                 LogManager.log("✅ Niveau terminé !");
-                this.scene.resetManager.reset("new-level");
-                this.scene.scene.restart();
+                
+                // Vérifie s'il y a un niveau suivant
+                if (this.scene.levelManager.nextLevel()) {
+                    LogManager.log("📈 Passage au niveau suivant...");
+                    // Réinitialise les bonus mais conserve les vies et le score
+                    this.scene.gameState.playerSpeed = 150;
+                    this.scene.gameState.maxBombs = 1;
+                    this.scene.gameState.bombSize = 1;
+                    this.scene.resetManager.reset("new-level");
+                    this.scene.scene.restart();
+                } else {
+                    LogManager.log("🏆 Tous les niveaux complétés !");
+                    this.scene.scene.start("GameOverScene");
+                }
             });
         } catch (e) {
             LogManager.warn('Exception levée MapManager -> spawnPortal() : ', e);
