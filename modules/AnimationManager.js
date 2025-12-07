@@ -26,10 +26,11 @@ export class AnimationManager {
                 end: row * this.config.tilesPerRow + offset + 3
             });
         
-            this.scene.anims.create({ key: 'up', frames: frames(6, 0), frameRate: 10, repeat: -1 });
-            this.scene.anims.create({ key: 'right', frames: frames(6, 4), frameRate: 10, repeat: -1 });
-            this.scene.anims.create({ key: 'down', frames: frames(6, 8), frameRate: 10, repeat: -1 });
-            this.scene.anims.create({ key: 'left', frames: frames(6, 12), frameRate: 10, repeat: -1 });
+            // Vérifie si l'animation existe déjà avant de la créer
+            if (!this.scene.anims.exists('up')) this.scene.anims.create({ key: 'up', frames: frames(6, 0), frameRate: 10, repeat: -1 });
+            if (!this.scene.anims.exists('right')) this.scene.anims.create({ key: 'right', frames: frames(6, 4), frameRate: 10, repeat: -1 });
+            if (!this.scene.anims.exists('down')) this.scene.anims.create({ key: 'down', frames: frames(6, 8), frameRate: 10, repeat: -1 });
+            if (!this.scene.anims.exists('left')) this.scene.anims.create({ key: 'left', frames: frames(6, 12), frameRate: 10, repeat: -1 });
         } catch (e) {
             LogManager.warn('AnimationManager', 'Exception levée AnimationManager -> createPlayerAnimations() : ', e);
             return;
@@ -38,6 +39,8 @@ export class AnimationManager {
 
     createBombAnimations() {
         try {
+            if (this.scene.anims.exists('bomb')) return; // Animation déjà créée
+            
             this.scene.anims.create({
                 key: 'bomb',
                 frames: this.scene.anims.generateFrameNumbers('sprites', {
@@ -60,18 +63,14 @@ export class AnimationManager {
                 end: row * this.config.tilesPerRow + colOffset
             });
     
-            // 🔥 Explosion centrale
-            this.scene.anims.create({ key: 'explosion-center', frames: explosionFrames(8, 1), frameRate: 10, repeat: 0 });
-    
-            // 🔥 Segments de l'explosion
-            this.scene.anims.create({ key: 'explosion-horizontal', frames: explosionFrames(9, 2), frameRate: 10, repeat: 0 });
-            this.scene.anims.create({ key: 'explosion-vertical', frames: explosionFrames(8, 0), frameRate: 10, repeat: 0 });
-    
-            // 🔥 Extrémités (puissance 1 uniquement)
-            this.scene.anims.create({ key: 'explosion-top', frames: explosionFrames(7, 0), frameRate: 10, repeat: 0 });
-            this.scene.anims.create({ key: 'explosion-bottom', frames: explosionFrames(9, 0), frameRate: 10, repeat: 0 });
-            this.scene.anims.create({ key: 'explosion-left', frames: explosionFrames(9, 1), frameRate: 10, repeat: 0 });
-            this.scene.anims.create({ key: 'explosion-right', frames: explosionFrames(9, 3), frameRate: 10, repeat: 0 });
+            // Crée les animations d'explosion seulement si elles n'existent pas
+            if (!this.scene.anims.exists('explosion-center')) this.scene.anims.create({ key: 'explosion-center', frames: explosionFrames(8, 1), frameRate: 10, repeat: 0 });
+            if (!this.scene.anims.exists('explosion-horizontal')) this.scene.anims.create({ key: 'explosion-horizontal', frames: explosionFrames(9, 2), frameRate: 10, repeat: 0 });
+            if (!this.scene.anims.exists('explosion-vertical')) this.scene.anims.create({ key: 'explosion-vertical', frames: explosionFrames(8, 0), frameRate: 10, repeat: 0 });
+            if (!this.scene.anims.exists('explosion-top')) this.scene.anims.create({ key: 'explosion-top', frames: explosionFrames(7, 0), frameRate: 10, repeat: 0 });
+            if (!this.scene.anims.exists('explosion-bottom')) this.scene.anims.create({ key: 'explosion-bottom', frames: explosionFrames(9, 0), frameRate: 10, repeat: 0 });
+            if (!this.scene.anims.exists('explosion-left')) this.scene.anims.create({ key: 'explosion-left', frames: explosionFrames(9, 1), frameRate: 10, repeat: 0 });
+            if (!this.scene.anims.exists('explosion-right')) this.scene.anims.create({ key: 'explosion-right', frames: explosionFrames(9, 3), frameRate: 10, repeat: 0 });
         } catch (e) {
             LogManager.warn('AnimationManager', 'Exception levée AnimationManager -> createExplosionAnimations() : ', e);
             return;

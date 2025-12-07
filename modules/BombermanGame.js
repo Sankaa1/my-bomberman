@@ -8,6 +8,7 @@ import { AnimationManager } from "./AnimationManager.js";
 import { BonusManager } from "./BonusManager.js";
 import { ResetManager } from "./ResetManager.js";
 import { HUDManager } from "./HUDManager.js";
+import { DOMHUDManager } from "./DOMHUDManager.js";
 import { LevelManager } from "./LevelManager.js";
 import { EnemyManager } from "./EnemyManager.js";
 import LogManager from "../utils/LogManager.js"; // implémenté ok
@@ -70,15 +71,6 @@ export class BombermanGame extends Phaser.Scene {
             });
             this.setupControls();
         
-            /* setTimeout(() => {
-                LogManager.log('BombermanGame', "🔄 Recréation des collisions...");
-                this.setupCollisions();
-            }, 100); */
-
-            this.time.delayedCall(100, () => {
-                this.setupCollisions()
-                LogManager.log('BombermanGame', "🔗 Collisions configurées !");
-            });
     
             this.bombs.enablePlayerCollision();
             
@@ -88,16 +80,19 @@ export class BombermanGame extends Phaser.Scene {
             }
 
             // Initialise et spawn les ennemis
-            if (!this.enemyManager) {
-                this.enemyManager = new EnemyManager(this);
-            } else {
-                this.enemyManager.clear();
-            }
+            // Crée TOUJOURS un nouvel EnemyManager pour éviter les problèmes de groupe
+            this.enemyManager = new EnemyManager(this);
             
             // Nombre d'ennemis augmente avec le niveau (1 + niveau/2)
             const enemyCount = Math.min(1 + Math.floor(this.levelManager.currentLevel / 2), 5);
             this.enemyManager.spawnEnemies(enemyCount, 'random');
             LogManager.log('BombermanGame', `👾 ${enemyCount} ennemi(s) spawnés pour le niveau ${this.levelManager.currentLevel}`);
+            
+            // Configure les collisions APRÈS le spawn des ennemis
+            this.time.delayedCall(100, () => {
+                this.setupCollisions()
+                LogManager.log('BombermanGame', "🔗 Collisions configurées !");
+            });
     
             this.isPaused = false;
             //this.pauseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -115,7 +110,8 @@ export class BombermanGame extends Phaser.Scene {
             this.levelDuration = levelConfig.timePerLevel * 1000; // Convertir en ms
             this.timeExpiredFlag = false; // Flag pour éviter d'appeler takeDamage() plusieurs fois
             
-            this.hud = new HUDManager(this);
+            // Crée le HUD DOM (en dehors de Phaser, dans le conteneur HTML)
+            this.domHud = new DOMHUDManager(this.gameState, this.levelManager);
         } catch (e) {
             LogManager.warn('BombermanGame', 'Exception levée BombermanGame -> create() : ', e);
             return;
@@ -129,18 +125,16 @@ export class BombermanGame extends Phaser.Scene {
                 return;
             }
         
-            const hudHeight = 50;  // ← Correspond au HUD (hauteur augmentée)
+            const gameWidth = this.map.cols * this.config.tileSize;
             const gameHeight = this.map.rows * this.config.tileSize;
-        
+
+            // La caméra suit le joueur normalement (pas de décalage viewport)
             this.cameras.main
                 .startFollow(this.player.sprite, true, 0.1, 0.1)
                 .setZoom(this.config.zoomRate)
-                .setBounds(0, -hudHeight, this.map.cols * this.config.tileSize, gameHeight + hudHeight); 
-                // 🔼 Décale la caméra pour qu'elle ne commence pas au (0,0) mais laisse de la place pour le HUD
-        
-            this.time.delayedCall(500, () => {
-                LogManager.log('BombermanGame', "📸 Caméra ajustée avec un HUD de", hudHeight, "px");
-            });
+                .setBounds(0, 0, gameWidth, gameHeight);
+
+            LogManager.log('BombermanGame', "📸 Caméra configurée - pas de décalage (HUD en HTML)");
         } catch(e) {
             LogManager.warn('BombermanGame', 'Exception levée BombermanGame -> setupCamera() : ', e);
             return;
@@ -164,6 +158,17 @@ export class BombermanGame extends Phaser.Scene {
             this.physics.add.collider(this.player.sprite, this.map.obstacles);
             this.physics.add.collider(this.bombs.group, this.map.walls);
             this.physics.add.collider(this.bombs.group, this.map.obstacles);
+            
+            // Les ennemis ont les mêmes contraintes que le joueur
+            LogManager.log('BombermanGame', `🔗 Création des collisions - enemyManager: ${this.enemyManager ? 'OK' : 'ERREUR'}, enemyGroup: ${this.enemyManager?.enemyGroup ? 'OK' : 'ERREUR'}, enemies count: ${this.enemyManager?.enemies.length || 0}`);
+            
+            if (this.enemyManager && this.enemyManager.enemyGroup) {
+                this.physics.add.collider(this.enemyManager.enemyGroup, this.map.walls);
+                this.physics.add.collider(this.enemyManager.enemyGroup, this.map.obstacles);
+                LogManager.log('BombermanGame', "✅ Collisions ennemis configurées");
+            } else {
+                LogManager.warn('BombermanGame', "⚠️ EnemyManager ou enemyGroup introuvable pour les collisions !");
+            }
         } catch (e) {
             LogManager.warn('BombermanGame', 'Exception levée BombermanGame -> setupCollisions() : ', e);
             return;
@@ -207,7 +212,11 @@ export class BombermanGame extends Phaser.Scene {
             } else if (!this.pauseKey) {
                 LogManager.warn('BombermanGame', "🚨 this.pauseKey est undefined dans update()");
             }
-            this.hud.updateHUD();
+            
+            // Met à jour le HUD DOM
+            if (this.domHud) {
+                this.domHud.update(this.gameState.timeRemaining);
+            }
         } catch (e) {
             LogManager.warn('BombermanGame', "Exception levée BombermanGame -> update() :", e);
         }

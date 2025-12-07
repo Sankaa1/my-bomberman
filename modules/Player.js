@@ -3,7 +3,7 @@ import { config } from "../utils/vars.js";
 import LogManager from "../utils/LogManager.js"; // Implémenté ok
 
 export class Player {
-    constructor(scene) {
+    constructor(scene, startX, startY) {
         try {
             if (!config) {
                 LogManager.error('Player', "❌ ERREUR: config est undefined dans Player !");
@@ -18,12 +18,14 @@ export class Player {
             this.scene = scene;
             this.speed = this.scene.gameState.playerSpeed;
             this.isMoving = false;
+            this.isInvincible = false; // Flag d'invincibilité après dégâts
+            this.invincibilityDuration = 1000; // 1 seconde d'invincibilité
     
             LogManager.log('Player', "🔍 Création du joueur avec config:", this.config);
 
             this.sprite = scene.physics.add.sprite(
-                this.config.player.startX * this.config.tileSize,
-                this.config.player.startY * this.config.tileSize, 
+                startX,
+                startY, 
                 'sprites', 
                 6 * this.config.tilesPerRow + 8
             )
@@ -85,8 +87,19 @@ export class Player {
     
     takeDamage() {
         try {
+            // Si le joueur est en invincibilité, ignore le dégât
+            if (this.isInvincible) {
+                LogManager.log('Player', `🛡️ Le joueur est invincible, dégât ignoré`);
+                return;
+            }
+
             if (this.scene.gameState.takeDamage()) {
                 LogManager.log('Player', `💔 Le joueur a été touché ! Vies restantes: ${this.scene.gameState.lives}`);
+                
+                // Active l'invincibilité LONGUE après respawn (2.5 secondes)
+                this.isInvincible = true;
+                this.invincibilityDuration = 2500; // 2.5 secondes après respawn
+                
                 this.scene.tweens.add({
                     targets: this.sprite,
                     alpha: 0,
@@ -107,11 +120,7 @@ export class Player {
         try {
             LogManager.log('Player', "🔄 Respawn du joueur...");
             this.sprite.setAlpha(0);
-            /* this.sprite.setPosition(
-                1 * this.config.tileSize, // Hardcodé temporairement, à gérer ailleurs si besoin
-                1 * this.config.tileSize
-            ); */
-
+            
             this.sprite.setPosition(
                 this.config.player.startX * this.config.tileSize,
                 this.config.player.startY * this.config.tileSize
@@ -127,6 +136,12 @@ export class Player {
             this.scene.levelStartTime = this.scene.time.now;
             this.scene.timeExpiredFlag = false;
             LogManager.log('Player', "⏱️ Timer réinitialisé après respawn");
+            
+            // Invincibilité commence maintenant après le respawn
+            this.scene.time.delayedCall(this.invincibilityDuration, () => {
+                this.isInvincible = false;
+                LogManager.log('Player', `⚡ L'invincibilité a expiré (respawn safe)`);
+            });
         } catch (e) {
             LogManager.warn('Player', 'Exception levée Player -> respawn() : ', e);
         }

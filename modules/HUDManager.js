@@ -9,10 +9,10 @@ export class HUDManager {
             const hudHeight = 50;
             
             // Fond simple rectangle - centré
-            this.hudBackground = scene.add.rectangle(width / 2, hudHeight / 2, width, hudHeight, 0x0a0a0a, 0.95)
-                .setOrigin(0.5, 0.5)
+            this.hudBackground = scene.add.rectangle(width / 2, 0, width, hudHeight, 0x0a0a0a, 0.95)
+                .setOrigin(0.5, 0)
                 .setScrollFactor(0)
-                .setDepth(100);
+                .setDepth(1000); // Très élevé pour rester au-dessus
 
             // Section VIES (Gauche) - 25% de la largeur
             const leftX = width * 0.17;
@@ -22,14 +22,14 @@ export class HUDManager {
                 fill: "#aaaaaa",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001).setY(8);
             
             this.livesText = scene.add.text(leftX, 22, "", { 
                 fontSize: "20px", 
                 fill: "#FF6B6B",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
 
             // Section SCORE (Centre) - 50% de la largeur
             const centerX = width * 0.5;
@@ -39,14 +39,14 @@ export class HUDManager {
                 fill: "#aaaaaa",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
             
             this.scoreText = scene.add.text(centerX, 22, "", { 
                 fontSize: "20px", 
                 fill: "#4ECDC4",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
 
             // Section TEMPS (Droite) - 75% de la largeur
             const rightX = width * 0.83;
@@ -56,14 +56,14 @@ export class HUDManager {
                 fill: "#aaaaaa",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
             
             this.timerText = scene.add.text(rightX, 22, "", { 
                 fontSize: "20px", 
                 fill: "#FFE66D",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
 
             // Section NIVEAU (entre score et temps)
             const levelX = width * 0.67;
@@ -73,14 +73,14 @@ export class HUDManager {
                 fill: "#aaaaaa",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
             
             this.levelText = scene.add.text(levelX, 22, "", { 
                 fontSize: "20px", 
                 fill: "#A4D65E",
                 fontFamily: "Arial",
                 fontStyle: "bold"
-            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(101);
+            }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
             
             // Cache des dernières valeurs affichées pour éviter les mises à jour inutiles
             this.lastLives = -1;
@@ -91,6 +91,14 @@ export class HUDManager {
             
             this.updateHUD();
             LogManager.log('HUDManager', "🟢 HUDManager créé avec nouveau design");
+            // Debug: expose positions and sizes
+            try {
+                LogManager.log('HUDManager', `debug: hudHeight=${this.hudHeight}, canvasWidth=${width}`);
+                LogManager.log('HUDManager', `debug: hudBackground @ (${this.hudBackground.x}, ${this.hudBackground.y}) origin=${this.hudBackground.originX},${this.hudBackground.originY}`);
+                LogManager.log('HUDManager', `debug: livesLabel @ (${this.livesLabel.x}, ${this.livesLabel.y}), livesText @ (${this.livesText.x}, ${this.livesText.y})`);
+            } catch (e) {
+                LogManager.warn('HUDManager', 'Exception debug HUD logging :', e);
+            }
         } catch (e) {
             LogManager.warn('HUDManager', "Exception levée HUDManager -> constructor() :", e);
         }

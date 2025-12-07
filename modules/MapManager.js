@@ -58,6 +58,9 @@ export class MapManager {
                 right: 14 * tp + 3,
                 bottom: 14 * tp
             };
+            LogManager.log("MapManager", `🔲 Génération des bordures - hudHeight: ${this.hudHeight}px`);
+            let borderCount = 0;
+            
             //Génération des murs extérieurs
             for(let x = 0; x < this.cols; x++) {
                 for(let y = 0; y < this.rows; y++) {
@@ -75,11 +78,13 @@ export class MapManager {
                         else frame = borderFrames.bottom;
 
                         this.createWall(x, y, frame);
+                        borderCount++;
                     }
                 }
             }
+            LogManager.log("MapManager", `✅ Bordures générées: ${borderCount} murs`);
         } catch (e) {
-            LogManager.warn('Exception levée MapManager -> generateBorders() : ', e);
+            LogManager.warn('MapManager', 'Exception levée MapManager -> generateBorders() : ', e);
             return;
         }
     }
@@ -94,17 +99,24 @@ export class MapManager {
                 spawnRate = levelConfig.mapSpawnRate;
             }
             
+            LogManager.log("MapManager", `📍 Génération interne - hudHeight: ${this.hudHeight}px, spawnRate: ${spawnRate}`);
+            let obstacleCount = 0;
+            let wallCount = 0;
+            
             for(let x = 2; x < this.cols - 2; x++) {
                 for(let y = 2; y < this.rows - 2; y++) {
                     if(x % 2 === 0 && y % 2 === 0) {
                         this.createWall(x, y, 28); // Blocs centraux indestructibles
+                        wallCount++;
                     } else if(Math.random() > spawnRate && !this.isInSafeZone(x, y)) {
                         this.createObstacle(x, y, 12); // Blocs destructibles
+                        obstacleCount++;
                     }
                 }
             }
+            LogManager.log("MapManager", `✅ Blocs générés - Murs internes: ${wallCount}, Obstacles: ${obstacleCount}`);
         } catch (e) {
-            LogManager.warn('Exception levée MapManager -> generateInternalBlocks() : ', e);
+            LogManager.warn('MapManager', 'Exception levée MapManager -> generateInternalBlocks() : ', e);
             return;
         }
     }
@@ -159,12 +171,12 @@ export class MapManager {
                 .setVisible(true);        
             
             wall.body.setSize(this.tileSize, this.tileSize);
-            wall.body.offset.set(0, 0); // Décalage optionnel si nécessaire
-            //LogManager.log("🧱 Mur ajouté à", gridX, gridY, "=> Position X:", x, "Y:", y);
+            wall.body.offset.set(0, 0);
+            //LogManager.log("MapManager", `🧱 Mur ajouté à grille(${gridX}, ${gridY}) => Position pixel(${x}, ${y})`);
 
             return wall;
         } catch (e) {
-            LogManager.warn('Exception levée MapManager -> createWall() : ', e);
+            LogManager.warn('MapManager', 'Exception levée MapManager -> createWall() : ', e);
             return;
         }
     }
@@ -181,11 +193,11 @@ export class MapManager {
 
             // Correction 2 : Gestion du corps physique
             obstacle.body.setSize(this.tileSize, this.tileSize);
-            LogManager.log("🧱 Obstacle ajouté à", gridX, gridY, "=> Position X:", x, "Y:", y);
+            LogManager.log("MapManager", `🧱 Obstacle ajouté à grille(${gridX}, ${gridY}) => Position pixel(${x}, ${y})`);
 
             return obstacle;
         } catch (e) {
-            LogManager.warn('Exception levée MapManager -> createObstacle() : ', e);
+            LogManager.warn('MapManager', 'Exception levée MapManager -> createObstacle() : ', e);
             return;
         }
     }

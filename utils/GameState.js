@@ -44,11 +44,11 @@ export class GameState {
 
     takeDamage(){ // Le joueur est touché (pour l'instant par une bombe, ensuite aussi par un ennemi)   
         try {
-            this.lives--;
+            this.lives = Math.max(0, this.lives - 1);
             return this.lives > 0;
         } catch (e) {
-            LogManager.warn('GameState', 'Exception levée GameState -> addScore() : ', e);
-            return;
+            LogManager.warn('GameState', 'Exception levée GameState -> takeDamage() : ', e);
+            return false;
         }
     }
 

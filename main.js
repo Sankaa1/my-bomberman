@@ -9,8 +9,9 @@ import { GameOverScene } from "./scenes/GameOverScene.js";
 // eslint-disable-next-line no-undef
 const phaserConfig = {
     type: Phaser.AUTO,
-    width: config.cols * config.tileSize,   // Largeur en pixels
-    height: config.rows * config.tileSize,  // Hauteur en pixels
+    width: config.cols * config.tileSize * 3,   // Largeur × 2
+    height: config.rows * config.tileSize * 3,  // Hauteur × 2 (sans HUD)
+    parent: 'game-container', // Cible le container game spécifique
     scale: { 
         mode: Phaser.Scale.FIT,             // Ajuste la taille à l'écran
         autoCenter: Phaser.Scale.CENTER_BOTH 

@@ -41,7 +41,7 @@ export const config = {
     },
 
     // ========== AFFICHAGE ==========
-    zoomRate: 1.1,
+    zoomRate: 4.3,
     backgroundColor: "#4b5320",
     
     // ========== GAMEPLAY ==========
@@ -49,5 +49,5 @@ export const config = {
     startingLives: 3,
     
     // ========== DEBUG ==========
-    debug: false // Change à true pour activer tous les logs
+    debug: true // Change à true pour activer tous les logs
 };

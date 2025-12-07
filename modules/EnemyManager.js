@@ -7,9 +7,15 @@ export class EnemyManager {
         try {
             this.scene = scene;
             this.config = scene.config;
-            this.enemies = [];
+            this.enemies = []; // Tableau d'objets Enemy
             
-            LogManager.log('EnemyManager', "🟢 EnemyManager créé");
+            // Groupe physique pour les collisions avec obstacles
+            this.enemyGroup = this.scene.physics.add.group({
+                classType: Phaser.GameObjects.Sprite
+            });
+            
+            LogManager.log('EnemyManager', "🟢 EnemyManager créé avec groupe de collisions");
+            LogManager.log('EnemyManager', `📊 Groupe physique: ${this.enemyGroup ? 'OK' : 'ERREUR'}`);
         } catch (e) {
             LogManager.warn('EnemyManager', 'Exception levée EnemyManager -> constructor() :', e);
         }
@@ -25,6 +31,9 @@ export class EnemyManager {
                 
                 const enemy = new Enemy(this.scene, spawnPos.x, spawnPos.y, enemyType);
                 this.enemies.push(enemy);
+                
+                // Ajoute le sprite au groupe pour les collisions
+                this.enemyGroup.add(enemy.sprite);
             }
             
             LogManager.log('EnemyManager', `🟢 ${count} ennemi(s) spawnés`);
@@ -36,14 +45,21 @@ export class EnemyManager {
     getRandomSpawnPosition() {
         try {
             // Cherche une position aléatoire libre (pas sur un obstacle ou mur)
+            // Évite aussi la zone de respawn du joueur (0-2, 0-2)
             let x, y, attempts = 0;
-            const maxAttempts = 10;
+            const maxAttempts = 20;
+            const minDistance = 4; // Au moins 4 tuiles de distance du joueur
+            const playerGridX = this.scene.config.player.startX;
+            const playerGridY = this.scene.config.player.startY;
             
             do {
                 x = Phaser.Math.RND.integerInRange(3, this.config.cols - 4);
                 y = Phaser.Math.RND.integerInRange(3, this.config.rows - 4);
+                
+                // Vérifie la distance avec le joueur
+                
                 attempts++;
-            } while (this.isPositionBlocked(x, y) && attempts < maxAttempts);
+            } while ((this.isPositionBlocked(x, y) || Phaser.Math.Distance.Between(x, y, playerGridX, playerGridY) < minDistance) && attempts < maxAttempts);
             
             return {
                 x: x * this.config.tileSize + this.config.tileSize / 2,
@@ -153,6 +169,7 @@ export class EnemyManager {
                 if (enemy) enemy.destroy();
             });
             this.enemies = [];
+            this.enemyGroup.clear(true); // Détruit tous les sprites du groupe
             LogManager.log('EnemyManager', "🗑️ Tous les ennemis supprimés");
         } catch (e) {
             LogManager.warn('EnemyManager', 'Exception levée EnemyManager -> clear() :', e);

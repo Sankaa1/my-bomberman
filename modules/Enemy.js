@@ -7,20 +7,18 @@ export class Enemy {
             this.scene = scene;
             this.config = scene.config;
             this.type = type; // 'purple' ou 'orange' (différentes IA)
-            this.speed = 100; // Vitesse de base
+            this.speed = 80; // Vitesse légèrement inférieure au joueur
             this.direction = Phaser.Math.RND.pick(['up', 'down', 'left', 'right']);
-            this.isMoving = false;
             this.lastDirectionChange = 0;
             this.directionChangeInterval = 2000; // Change de direction toutes les 2s
             
-            // Sélectionne le frame initial basé sur le type
+            // Frame initial: purple à 5*tilesPerRow (lignes 0-3), orange à 6*tilesPerRow (lignes 4-7)
             const frameOffset = type === 'purple' ? 5 * this.config.tilesPerRow : 6 * this.config.tilesPerRow;
             
             this.sprite = scene.physics.add.sprite(x, y, 'sprites', frameOffset)
                 .setSize(12, 12)
                 .setOffset(2, 2)
-                .setOrigin(0.5)
-                .setCollideWorldBounds(true);
+                .setOrigin(0.5);
             
             // Création des animations si elles n'existent pas
             this.createAnimations();
@@ -33,25 +31,29 @@ export class Enemy {
 
     createAnimations() {
         try {
-            if (this.scene.anims.exists(`${this.type}-walk`)) {
-                return; // Animations déjà créées
-            }
-
+            const directions = ['up', 'right', 'down', 'left'];
             const frameOffset = this.type === 'purple' ? 5 : 6;
-            const startFrame = frameOffset * this.config.tilesPerRow;
+            const baseFrame = frameOffset * this.config.tilesPerRow;
 
-            // Animation de marche pour ce type d'ennemi
-            this.scene.anims.create({
-                key: `${this.type}-walk`,
-                frames: this.scene.anims.generateFrameNumbers('sprites', {
-                    start: startFrame,
-                    end: startFrame + 7
-                }),
-                frameRate: 10,
-                repeat: -1
+            // Crée une animation pour chaque direction (4 frames par direction)
+            // Spritesheet organisation: ligne 0=up, ligne 1=right, ligne 2=down, ligne 3=left
+            directions.forEach((dir, index) => {
+                const animKey = `${this.type}-${dir}`;
+                if (this.scene.anims.exists(animKey)) return;
+
+                const startFrame = baseFrame + (index * 4);
+                this.scene.anims.create({
+                    key: animKey,
+                    frames: this.scene.anims.generateFrameNumbers('sprites', {
+                        start: startFrame,
+                        end: startFrame + 3
+                    }),
+                    frameRate: 8,
+                    repeat: -1
+                });
             });
 
-            LogManager.log('Enemy', `🎬 Animation créée pour ${this.type}-walk`);
+            LogManager.log('Enemy', `🎬 Animations créées pour ${this.type} (4 directions, 4 frames chacune)`);
         } catch (e) {
             LogManager.warn('Enemy', 'Exception levée Enemy -> createAnimations() :', e);
         }
@@ -59,18 +61,19 @@ export class Enemy {
 
     update() {
         try {
-            // Change de direction aléatoirement
+            // Change de direction aléatoirement ou si coincé
             if (this.scene.time.now - this.lastDirectionChange > this.directionChangeInterval) {
                 this.changeDirection();
                 this.lastDirectionChange = this.scene.time.now;
             }
 
-            // Applique le mouvement selon la direction
-            this.applyMovement();
+            // Essaye de se déplacer (respecte les collisions physiques)
+            this.tryMove();
             
-            // Joue l'animation
-            if (!this.sprite.anims.isPlaying) {
-                this.sprite.play(`${this.type}-walk`);
+            // Joue l'animation correspondant à la direction
+            const animKey = `${this.type}-${this.direction}`;
+            if (!this.sprite.anims.isPlaying || this.sprite.anims.currentAnim.key !== animKey) {
+                this.sprite.play(animKey);
             }
         } catch (e) {
             LogManager.warn('Enemy', 'Exception levée Enemy -> update() :', e);
@@ -79,37 +82,45 @@ export class Enemy {
 
     changeDirection() {
         try {
-            const directions = ['up', 'down', 'left', 'right'];
-            // Favorise les changements de direction
-            this.direction = Phaser.Math.RND.pick(directions);
-            LogManager.log('Enemy', `🔄 Ennemi ${this.type} change de direction : ${this.direction}`);
+            const directions = ['up', 'right', 'down', 'left'];
+            const previousDirection = this.direction;
+            
+            // Essaye une nouvelle direction aléatoire
+            do {
+                this.direction = Phaser.Math.RND.pick(directions);
+            } while (this.direction === previousDirection && Math.random() < 0.7); // 70% chance de changement
+            
+            LogManager.log('Enemy', `🔄 Ennemi ${this.type} change de direction: ${previousDirection} → ${this.direction}`);
         } catch (e) {
             LogManager.warn('Enemy', 'Exception levée Enemy -> changeDirection() :', e);
         }
     }
 
-    applyMovement() {
+    tryMove() {
         try {
             const velocity = this.speed;
+            let newVelX = 0;
+            let newVelY = 0;
             
             switch (this.direction) {
                 case 'up':
-                    this.sprite.setVelocity(0, -velocity);
+                    newVelY = -velocity;
                     break;
                 case 'down':
-                    this.sprite.setVelocity(0, velocity);
+                    newVelY = velocity;
                     break;
                 case 'left':
-                    this.sprite.setVelocity(-velocity, 0);
+                    newVelX = -velocity;
                     break;
                 case 'right':
-                    this.sprite.setVelocity(velocity, 0);
+                    newVelX = velocity;
                     break;
-                default:
-                    this.sprite.setVelocity(0, 0);
             }
+            
+            // Applique la vélocité (la physique gérera les collisions avec les obstacles)
+            this.sprite.setVelocity(newVelX, newVelY);
         } catch (e) {
-            LogManager.warn('Enemy', 'Exception levée Enemy -> applyMovement() :', e);
+            LogManager.warn('Enemy', 'Exception levée Enemy -> tryMove() :', e);
         }
     }
 
