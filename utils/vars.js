@@ -44,6 +44,16 @@ export const config = {
     zoomRate: 4.3,
     backgroundColor: "#4b5320",
     
+    // ========== SCENES - DIMENSIONS DYNAMIQUES ==========
+    gameOverScene: {
+        titleFontSize: "36px",
+        titleColor: "#FF0000",
+        instructionFontSize: "16px",
+        instructionColor: "#FFFFFF",
+        titleYOffset: -80,      // Décalage du titre par rapport au centre
+        instructionYOffset: 40  // Décalage des instructions par rapport au titre
+    },
+    
     // ========== GAMEPLAY ==========
     timePerLevel: 120,      // Temps limite en secondes
     startingLives: 3,

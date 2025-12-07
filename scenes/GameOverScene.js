@@ -1,5 +1,6 @@
 // GameOverScene.js
 import LogManager from "../utils/LogManager.js";
+import { config } from "../utils/vars.js";
 
 export class GameOverScene extends Phaser.Scene {
     constructor() {
@@ -20,8 +21,22 @@ export class GameOverScene extends Phaser.Scene {
         try {
             LogManager.log('GameOverScene', '☠ GAME OVER ☠');
 
-            this.add.text(100, 100, "GAME OVER", { fontSize: "36px", fill: "#FF0000" });
-            this.add.text(80, 150, "Press SPACE to Restart", { fontSize: "16px", fill: "#FFFFFF" });
+            // Récupère les dimensions du canvas
+            const centerX = this.scale.width / 2;
+            const centerY = this.scale.height / 2;
+            const sceneConfig = config.gameOverScene;
+
+            // Titre "GAME OVER" centré
+            this.add.text(centerX, centerY + sceneConfig.titleYOffset, "GAME OVER", {
+                fontSize: sceneConfig.titleFontSize,
+                fill: sceneConfig.titleColor
+            }).setOrigin(0.5, 0.5); // Centre le texte sur son pivot
+
+            // Instructions centré sous le titre
+            this.add.text(centerX, centerY + sceneConfig.titleYOffset + sceneConfig.instructionYOffset, "Press SPACE to Restart", {
+                fontSize: sceneConfig.instructionFontSize,
+                fill: sceneConfig.instructionColor
+            }).setOrigin(0.5, 0.5); // Centre le texte sur son pivot
 
             this.input.keyboard.on("keydown-SPACE", () => {
                 LogManager.log('GameOverScene', '🔄 Redémarrage du jeu !');
