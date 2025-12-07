@@ -122,6 +122,11 @@ export class Player {
                 alpha: 1,
                 duration: 500
             });
+
+            // Réinitialise le timer du niveau lors du respawn
+            this.scene.levelStartTime = this.scene.time.now;
+            this.scene.timeExpiredFlag = false;
+            LogManager.log('Player', "⏱️ Timer réinitialisé après respawn");
         } catch (e) {
             LogManager.warn('Player', 'Exception levée Player -> respawn() : ', e);
         }
