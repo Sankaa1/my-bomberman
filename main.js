@@ -1,5 +1,6 @@
 // main.js
 import LogManager from "./utils/LogManager.js";
+import Phaser from "phaser";
 import { config } from "./utils/vars.js";
 import { BombermanGame } from "./modules/BombermanGame.js";
 import { PauseScene } from "./scenes/PauseScene.js";

@@ -7,7 +7,8 @@
   "scripts": {
     "start": "python -m http.server 8000",
     "dev": "http-server -p 8000",
-    "serve": "npx http-server"
+    "serve": "npx http-server",
+    "lint": "eslint --ext .js ."
   },
   "keywords": [
     "bomberman",
@@ -24,7 +25,11 @@
   "engines": {
     "node": ">=14.0.0"
   },
+  "dependencies": {
+    "phaser": "^3.60.0"
+  },
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "eslint": "^8.50.0"
   }
 }

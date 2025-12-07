@@ -63,11 +63,11 @@ export class MapManager {
                 for(let y = 0; y < this.rows; y++) {
                     if(x === 0 || y === 0 || x === this.cols - 1 || y === this.rows - 1) {
                         let frame;
-                        if(
-                            (x === 0 && y === 0) ||
-                            (x === this.cols - 1 && y === 0) ||
-                            (x === 0 && y === this.cols - 1))
-                            frame = borderFrames.corner;
+                            if(
+                                (x === 0 && y === 0) ||
+                                (x === this.cols - 1 && y === 0) ||
+                                (x === 0 && y === this.rows - 1))
+                                frame = borderFrames.corner;
                         else if(x === 0) frame = borderFrames.left;
                         else if(y === 0) frame = borderFrames.top;
                         else if(x === this.cols - 1) frame = borderFrames.right;
