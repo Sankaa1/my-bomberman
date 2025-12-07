@@ -1,19 +1,12 @@
 // main.js
 import LogManager from "./utils/LogManager.js";
-import Phaser from "phaser";
-// Expose Phaser globally for modules that reference the global `Phaser` variable
-if (typeof window !== 'undefined') window.Phaser = Phaser;
 import { config } from "./utils/vars.js";
 import { BombermanGame } from "./modules/BombermanGame.js";
 import { PauseScene } from "./scenes/PauseScene.js";
 import { GameOverScene } from "./scenes/GameOverScene.js";
 
-//LogManager.toggleAllDebug(config.debug); // Initialise avec la valeur de config false-> Pas de log
-// Zoom sur un script pour débug -> Seuls les logs du fichier
-LogManager.toggleAllDebug(false);
-LogManager.toggleDebug('BombermanGame', true); // Sniper activé
-LogManager.toggleDebug('Player', true)
-
+// Phaser is now available globally from CDN (loaded in index.html)
+// eslint-disable-next-line no-undef
 const phaserConfig = {
     type: Phaser.AUTO,
     width: config.cols * config.tileSize,   // Largeur en pixels
@@ -43,3 +36,9 @@ const phaserConfig = {
 
 // eslint-disable-next-line no-unused-vars
 const game = new Phaser.Game(phaserConfig);
+
+//LogManager.toggleAllDebug(config.debug); // Initialise avec la valeur de config false-> Pas de log
+// Zoom sur un script pour débug -> Seuls les logs du fichier
+LogManager.toggleAllDebug(false);
+LogManager.toggleDebug('BombermanGame', true); // Sniper activé
+LogManager.toggleDebug('Player', true)
