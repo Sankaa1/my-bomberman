@@ -85,21 +85,10 @@ export class BombermanGame extends Phaser.Scene {
                 LogManager.error('BombermanGame', "❌ Impossible de transmettre resetManager à GameOverScene !");
             }
             
-            /* this.timerEvent = this.time.addEvent({
-                delay: 120000,
-                callback: () => {
-                    LogManager.log('BombermanGame', "⏳ Time's up !");
-                    this.player.takeDamage();
-                }
-            }); */
-            
-            this.timerEvent = this.time.addEvent({
-                delay: config.timePerLevel * 1000, // 120s -> ms
-                callback: () => {
-                    LogManager.log('BombermanGame', "⏳ Time's up !");
-                    this.player.takeDamage();
-                }
-            });
+            // Initialise le chronomètre du niveau
+            this.levelStartTime = this.time.now; // Temps en ms depuis le démarrage de Phaser
+            this.levelDuration = config.timePerLevel * 1000; // Convertir en ms
+            this.timeExpiredFlag = false; // Flag pour éviter d'appeler takeDamage() plusieurs fois
             
             this.hud = new HUDManager(this);
         } catch (e) {
@@ -158,6 +147,18 @@ export class BombermanGame extends Phaser.Scene {
 
     update() {
         try {
+            // Calcule le temps restant basé sur l'heure écoulée depuis le début du niveau
+            const elapsedTime = this.time.now - this.levelStartTime;
+            const newTimeRemaining = Math.max(0, this.levelDuration - elapsedTime) / 1000; // Convertir en secondes
+            this.gameState.timeRemaining = newTimeRemaining;
+            
+            // Vérifie si le temps vient d'expirer et appelle takeDamage() une seule fois
+            if (newTimeRemaining <= 0 && !this.timeExpiredFlag) {
+                LogManager.log('BombermanGame', "⏳ Time's up !");
+                this.timeExpiredFlag = true;
+                this.player.takeDamage();
+            }
+            
             if (this.player) {
                 this.player.handleMovement(this.cursors);
             } else {
