@@ -214,6 +214,15 @@ export class BombManager {
                         comboCount++;
                         break;
                     }
+
+                    // Tue les ennemis touchés par l'explosion
+                    if (this.scene.enemyManager) {
+                        const killed = this.scene.enemyManager.killEnemyAt(newX, newY, this.config.tileSize);
+                        if (killed > 0) {
+                            LogManager.log("BombManager", `👾 ${killed} ennemi(s) tué(s) par l'explosion à (${newX}, ${newY})`);
+                            comboCount += killed;
+                        }
+                    }
                     
                     let explosionKey = (i === explosionSize) ? dir.endKey : dir.midKey;
                     LogManager.log("BombManager", `🔥 Spawn explosion à (${newX}, ${newY}) avec ${explosionKey}`);

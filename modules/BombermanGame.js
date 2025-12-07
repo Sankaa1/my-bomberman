@@ -9,6 +9,7 @@ import { BonusManager } from "./BonusManager.js";
 import { ResetManager } from "./ResetManager.js";
 import { HUDManager } from "./HUDManager.js";
 import { LevelManager } from "./LevelManager.js";
+import { EnemyManager } from "./EnemyManager.js";
 import LogManager from "../utils/LogManager.js"; // implémenté ok
 
 export class BombermanGame extends Phaser.Scene {
@@ -20,6 +21,7 @@ export class BombermanGame extends Phaser.Scene {
         this.resetManager = null;
         this.hud = null;
         this.levelManager = null;
+        this.enemyManager = null;
     }
 
     // modules/BombermanGame.js
@@ -84,6 +86,18 @@ export class BombermanGame extends Phaser.Scene {
                 LogManager.log('BombermanGame', "🔄 Recréation du BonusManager après un reset...");
                 this.bonusManager = new BonusManager(this);
             }
+
+            // Initialise et spawn les ennemis
+            if (!this.enemyManager) {
+                this.enemyManager = new EnemyManager(this);
+            } else {
+                this.enemyManager.clear();
+            }
+            
+            // Nombre d'ennemis augmente avec le niveau (1 + niveau/2)
+            const enemyCount = Math.min(1 + Math.floor(this.levelManager.currentLevel / 2), 5);
+            this.enemyManager.spawnEnemies(enemyCount, 'random');
+            LogManager.log('BombermanGame', `👾 ${enemyCount} ennemi(s) spawnés pour le niveau ${this.levelManager.currentLevel}`);
     
             this.isPaused = false;
             //this.pauseKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
@@ -175,6 +189,13 @@ export class BombermanGame extends Phaser.Scene {
             } else {
                 LogManager.warn('BombermanGame', "🚨 this.player est undefined dans update()");
             }
+            
+            // Met à jour et gère les ennemis
+            if (this.enemyManager) {
+                this.enemyManager.update();
+                this.enemyManager.checkCollisionWithPlayer(this.player);
+            }
+            
             if (this.bombKey && Phaser.Input.Keyboard.JustDown(this.bombKey)) {
                 this.bombs.placeBomb(this.player.sprite.x, this.player.sprite.y);
             } else if (!this.bombKey) {
